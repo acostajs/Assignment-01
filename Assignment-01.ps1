@@ -12,7 +12,7 @@ function ForExit {
 
 Do {
     
-    function CreateCSV {
+    function AddContentCSV {
         Write-Host "You have choosen to Create an CSV" -ForegroundColor Cyan
 
         # To choose the file directory
@@ -180,7 +180,7 @@ Do {
 
     Write-Host "Select a function to execute:"
     Write-Host "1 for CreateCSV"
-    Write-Host "2 for ModifyCSV"
+    Write-Host "2 for AddContentCSV"
     Write-Host "3 for ImportFromCSV"
     Write-Host "4 for Exit"
     $Choice = (Read-Host -Prompt "Enter the number of your choice")
