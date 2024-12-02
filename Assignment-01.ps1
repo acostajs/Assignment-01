@@ -12,7 +12,7 @@ function ForExit {
 
 Do {
     
-    function AddContentCSV {
+    function CreateCSV {
         Write-Host "You have choosen to Create an CSV" -ForegroundColor Cyan
 
         # To choose the file directory
@@ -101,12 +101,7 @@ Do {
         return $FullPath
     } 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     function AddContentCSV {
-=======
-    function ModifyCSV {
->>>>>>> origin/Juan
         Write-Host "You have choosen to modify a CSV" -ForegroundColor Cyan
         write-host "The Last CSV was previously created at :$FullPath" -ForegroundColor Yellow
         
@@ -176,11 +171,6 @@ Do {
             }
     } 
 
-<<<<<<< HEAD
-=======
->>>>>>> parent of ae6130e (Did some modifications and added a Function to add more content previously created CSV or a another CSV file.)
-=======
->>>>>>> origin/Juan
     
 
 
@@ -190,7 +180,7 @@ Do {
 
     Write-Host "Select a function to execute:"
     Write-Host "1 for CreateCSV"
-    Write-Host "2 for AddContentCSV"
+    Write-Host "2 for ModifyCSV"
     Write-Host "3 for ImportFromCSV"
     Write-Host "4 for Exit"
     $Choice = (Read-Host -Prompt "Enter the number of your choice")
