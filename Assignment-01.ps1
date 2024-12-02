@@ -101,7 +101,7 @@ Do {
         return $FullPath
     } 
 
-    function ModifyCSV {
+    function AddContentCSV {
         Write-Host "You have choosen to modify a CSV" -ForegroundColor Cyan
         write-host "The Last CSV was previously created at :$FullPath" -ForegroundColor Yellow
         
@@ -189,7 +189,7 @@ Do {
         }
         Switch ($Choice) {
             1 { CreateCSV }
-            2 { ModifyCSV }
+            2 { AddContentCSV }
             3 { ImportFromCSV }
             4 { ForExit }
             Default { Write-Host "Invalid choice. Please try again." -ForegroundColor Yellow }
