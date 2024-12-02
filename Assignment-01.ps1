@@ -171,11 +171,24 @@ Do {
             }
     } 
 
-    function importCSV {
+    function DataCSV {
+        $csvFileToReadPath = $FullPath
+        $csvData = Import-csv -path $csvFileToReadPath
+        $names = $csvData | ForEach-Object{$_.name}
+        Write-Host $names
+
+        $newpath = (read-host -Prompt "Input the new path")
+        mkdir $newpath
+        $newname = (read-host -Prompt "input the new name file")
+        $newnamecsv = "$newname.csv"
+        new-item -path $newpath -name $newnamecsv -itemtype "file"
+        $newnewfullpath = join-path -Path $newpath -childpath $newnamecsv
+
+        add-content -path $newnewfullpath -value $names
+        Import-csv $newnewfullpath
+
         
     }
-
-
 
 
 
@@ -183,7 +196,7 @@ Do {
     Write-Host "Select a function to execute:"
     Write-Host "1 for CreateCSV"
     Write-Host "2 for ModifyCSV"
-    Write-Host "3 for ImportFromCSV"
+    Write-Host "3 for DataCSV"
     Write-Host "4 for Exit"
     $Choice = (Read-Host -Prompt "Enter the number of your choice")
         if ([string]::IsNullOrWhiteSpace($Choice)) {
@@ -192,7 +205,7 @@ Do {
         Switch ($Choice) {
             1 { CreateCSV }
             2 { AddContentCSV }
-            3 { ImportFromCSV }
+            3 { DataCSV }
             4 { ForExit }
             Default { Write-Host "Invalid choice. Please try again." -ForegroundColor Yellow }
         }  
