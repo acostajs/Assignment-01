@@ -1,4 +1,7 @@
+# To save global variable for Exiting loop
 $Global:Exit = "n"
+
+# Function to exit the loop menu
 function ForExit {
     $ExitChoice = (Read-Host -Prompt "Do you want to exit? (y/n)").ToLower()
     if ([string]::IsNullOrWhiteSpace($ExitChoice)) {
@@ -11,7 +14,6 @@ function ForExit {
 }
 
 Do {
-    
     # Creates a new CSV file, in the path choosen, we can add content and read it.
     function CreateCSV {
         Write-Host "You have choosen to Create an CSV" -ForegroundColor Cyan
@@ -220,6 +222,7 @@ Do {
             }
     } 
 
+    # To transfer data to a new CSV file, and archive the older version if necessary
     function DataCSV {
         Write-Host "The last created CSV is : $FullPath"
         $PreviousChoice = (Read-Host -Prompt "Do you want to import data from the previously created CSV? (y/n)")
@@ -381,53 +384,52 @@ Do {
     }
 
     function RemoveCSV {
-        Write-Host "The last created CSV is : $FullPath"
-        $PreviousChoice = (Read-Host -Prompt "Do you want to remove the previously created CSV? (y/n)")
-        $UserChoice = $PreviousChoice.ToLower()
-        if ([string]::IsNullOrWhiteSpace($UserChoice)) {
-            Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
-            return
-        } 
-        elseif ($UserChoice -ne "n" -and $UserChoice -ne "y") {
-            Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
-            return
-        }
-        elseif ($UserChoice -eq "y") {
-            Remove-Item -Path $FullPath
-            $Global:FullPath = "null"
-        }
-        else {
-            $RemoveChoice = (Read-Host -Prompt "Do you want to remove another file? (y/n)")
-            if ([string]::IsNullOrWhiteSpace($RemoveChoice)) {
+        if(Test-Path -Path $FullPath){
+            Write-Host "The last created CSV is : $FullPath"
+            $PreviousChoice = (Read-Host -Prompt "Do you want to remove the previously created CSV? (y/n)")
+            $UserChoice = $PreviousChoice.ToLower()
+            if ([string]::IsNullOrWhiteSpace($UserChoice)) {
                 Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
                 return
             } 
-            elseif ($RemoveChoice -ne "n" -and $RemoveChoice -ne "y") {
+            elseif ($UserChoice -ne "n" -and $UserChoice -ne "y") {
                 Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
                 return
             }
-            elseif ($RemoveChoice -eq "y") {
-                $RemovePath = (Read-Host -Prompt "Input the path where the file you want to remove is located")
-                if ([string]::IsNullOrWhiteSpace($RemovePath)) {
-                    Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
-                    return
-                } 
-                elseif (-Not (Test-Path -Path $RemovePath)) {
-                    Write-Host "Invalid directory path. Exiting ..." -ForegroundColor Red
-                    return
-                }
-                else {
-                    ls $RemovePath
-                    $RemoveFile = (Read-Host -Prompt "Which file do you want to remove?")
-                    $RemoveFullPath = Join-Path -Path $RemovePath -ChildPath $RemoveFile
-                    Remove-Item -Path $RemoveFullPath
-                }
+            elseif ($UserChoice -eq "y") {
+                Remove-Item -Path $FullPath
             }
-            else {
+        }       
+        $RemoveChoice = (Read-Host -Prompt "Do you want to remove a file? (y/n)")
+        $RemoveDecision = $RemoveChoice.ToLower()
+        if ([string]::IsNullOrWhiteSpace($RemoveDecision)) {
+            Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+            return
+        } 
+        elseif ($RemoveDecision -ne "n" -and $RemoveDecision -ne "y") {
+            Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
+            return
+        }
+        elseif ($RemoveDecision -eq "n"){
+            return
+        }
+        else {
+            $RemovePath = (Read-Host -Prompt "Input the path where the file you want to remove is located")
+            if ([string]::IsNullOrWhiteSpace($RemovePath)) {
+                Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                return
+            } 
+            elseif (-Not (Test-Path -Path $RemovePath)) {
+                Write-Host "Invalid directory path. Exiting ..." -ForegroundColor Red
                 return
             }
+            else {
+                ls $RemovePath
+                $RemoveFile = (Read-Host -Prompt "Which file do you want to remove?")
+                $RemoveFullPath = Join-Path -Path $RemovePath -ChildPath $RemoveFile
+                Remove-Item -Path $RemoveFullPath
+            }
         }
-
     }
 
     Write-Host "Select a function to execute:"
