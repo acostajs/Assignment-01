@@ -394,6 +394,7 @@ Do {
         }
         elseif ($UserChoice -eq "y") {
             Remove-Item -Path $FullPath
+            $Global:FullPath = "null"
         }
         else {
             $RemoveChoice = (Read-Host -Prompt "Do you want to remove another file? (y/n)")
@@ -417,8 +418,10 @@ Do {
                 }
                 else {
                     ls $RemovePath
+                    $RemoveFile = (Read-Host -Prompt "Which file do you want to remove?")
+                    $RemoveFullPath = Join-Path -Path $RemovePath -ChildPath $RemoveFile
+                    Remove-Item -Path $RemoveFullPath
                 }
-                
             }
             else {
                 return
@@ -426,26 +429,6 @@ Do {
         }
 
     }
-    
-    
-        # This is the logic we talked in class, Im saving in it as reference
-        # $csvFileToReadPath = $FullPath
-        # $csvData = Import-csv -path $csvFileToReadPath
-        # $names = $csvData | ForEach-Object{$_.name}
-        # Write-Host $names
-
-        # $newpath = (read-host -Prompt "Input the new path")
-        # mkdir $newpath
-        # $newname = (read-host -Prompt "input the new name file")
-        # $newnamecsv = "$newname.csv"
-        # new-item -path $newpath -name $newnamecsv -itemtype "file"
-        # $newnewfullpath = join-path -Path $newpath -childpath $newnamecsv
-
-        # add-content -path $newnewfullpath -value $names
-        # Import-csv $newnewfullpath
-
-
-
 
     Write-Host "Select a function to execute:"
     Write-Host "1 to Create a new CSV"
