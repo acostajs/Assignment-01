@@ -45,7 +45,7 @@ Do {
         
         # To choose the files new name 
         $NewPath = "$Path\$FolderName"
-        $FileName = (Read-Host -Prompt "How are you going to name your new file (Do not add .csv extension)?")
+        $FileName = (Read-Host -Prompt "Enter name for your new file (without extension)?")
         if ([string]::IsNullOrWhiteSpace($FileName)) {
             Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
             return
@@ -144,7 +144,7 @@ Do {
                         return
                     }
                     else{
-                        Import-CSV -Path $NewFullPath
+                        Get-Content -Path $NewFullPath
                     }
                 
             }   
@@ -231,73 +231,205 @@ Do {
         } elseif ($UserChoice -ne "n" -and $UserChoice -ne "y") {
             Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
             return
-        } elseif ($UserChoice -eq "y") {
-            $CsvData = Import-Csv -Path $FullPath
-            $Global:ExtractedData = $null 
-
-            # Define the functions before the Switch block
-            function Column {
-                $ColumnName = Read-Host "Input the name of the column"
-                    if ([string]::IsNullOrWhiteSpace($UserChoice)) {
-                        Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
-                        return
-                    }
-                $ColumnName = Read-Host "Input the name of the column"
-                $Global:ExtractedData = $CsvData | ForEach-Object { $_.$ColumnName }
-                Write-Host "Selected Column Data:"
-                $Global:ExtractedData | ForEach-Object { Write-Host $_ }
+        }
+    
+        # Choose a file if the user decides not to use the last created CSV
+        if ($UserChoice -eq "n") {
+            $NewPath = Read-Host "Enter the directory where the desired file is located"
+            if ([string]::IsNullOrWhiteSpace($NewPath)) {
+                Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                return
             }
-    
-            function Row {
-                $RowIndex = Read-Host "Input the row number (zero-based index)"
-                    if (-not [int]::TryParse($RowIndex, [ref]$null)) {
-                        Write-Host "Invalid row number. Please enter a valid number." -ForegroundColor Yellow
-                        return
-                    }
-                $Global:ExtractedData = $CsvData[$RowIndex]
-                Write-Host "Selected Row Data:"
-                $Global:ExtractedData
-            }
-    
-            function Cell {
-                $ColumnName = Read-Host "Input the name of the column"
-                    if ([string]::IsNullOrWhiteSpace($UserChoice)) {
-                        Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
-                        return
-                    }
-                $RowIndex = Read-Host "Input the row number (zero-based index)"
-                    if (-not [int]::TryParse($RowIndex, [ref]$null)) {
-                        Write-Host "Invalid row number. Please enter a valid number." -ForegroundColor Yellow
-                        return
-                    }
-                $Global:ExtractedData = $CsvData[$RowIndex].$ColumnName
-                Write-Host "Selected Cell Value:"
-                Write-Host $Global:ExtractedData 
-            }
-    
-            # Display options and invoke functions based on user choice
-            Write-Host "Choose the information you want to extract:" -ForegroundColor Cyan
-            Write-Host "1: To Choose a Column" -ForegroundColor DarkBlue
-            Write-Host "2: To Choose a Row" -ForegroundColor DarkBlue
-            Write-Host "3: To Choose a specific Cell" -ForegroundColor DarkBlue
-    
-            $Choice = Read-Host "Enter the number of your choice"
-            if ([string]::IsNullOrWhiteSpace($Choice)) {
-                Write-Host "No choice made. Exiting ..." -ForegroundColor Yellow
+            elseif (-Not (Test-Path -Path $NewPath)) {
+                Write-Host "Invalid directory path. Exiting ..." -ForegroundColor Red
                 return
             }
     
-            Switch ($Choice) {
-                1 { Column }  
-                2 { Row }     
-                3 { Cell }    
-                Default { Write-Host "Invalid choice. Please try again." -ForegroundColor Yellow }
+            # List files in the folder
+            Write-Host "Files in the folder:" -ForegroundColor Cyan
+            ls $NewPath
+    
+            $ChosenFile = Read-Host "Enter the name of the file you want to use (including extension)"
+            $FullPath = Join-Path -Path $NewPath -ChildPath $ChosenFile
+            if ([string]::IsNullOrWhiteSpace($ChosenFile)) {
+                Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                return
+            }
+            elseif (-Not (Test-Path -Path $FullPath)) {
+                Write-Host "The selected file does not exist. Exiting ..." -ForegroundColor Red
+                return
             }
         }
+    
+        $CsvData = Import-Csv -Path $FullPath
+        $Global:ExtractedData = $null  # Clear previous data
+    
+        function Column {
+            $ColumnName = Read-Host "Input the name of the column"
+            if ([string]::IsNullOrWhiteSpace($ColumnName)) {
+                Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                return
+            }
+            $Global:ExtractedData = $CsvData | ForEach-Object { $_.$ColumnName }
+            Write-Host "Selected Column Data:"
+            $Global:ExtractedData | ForEach-Object { Write-Host $_ }
+        }
+    
+        function Row {
+            $RowIndex = Read-Host "Input the row number (zero-based index)"
+            if (-not [int]::TryParse($RowIndex, [ref]$null)) {
+                Write-Host "Invalid row number. Please enter a valid number." -ForegroundColor Yellow
+                return
+            }
+            $Global:ExtractedData = $CsvData[$RowIndex]
+            Write-Host "Selected Row Data:"
+            $Global:ExtractedData
+        }
+    
+        function Cell {
+            $ColumnName = Read-Host "Input the name of the column"
+            if ([string]::IsNullOrWhiteSpace($ColumnName)) {
+                Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                return
+            }
+            $RowIndex = Read-Host "Input the row number (zero-based index)"
+            if (-not [int]::TryParse($RowIndex, [ref]$null)) {
+                Write-Host "Invalid row number. Please enter a valid number." -ForegroundColor Yellow
+                return
+            }
+            $Global:ExtractedData = $CsvData[$RowIndex].$ColumnName
+            Write-Host "Selected Cell Value:"
+            Write-Host $Global:ExtractedData
+        }
+    
+        # Display options and invoke functions based on user choice
+        Write-Host "Choose the information you want to extract:" -ForegroundColor Cyan
+        Write-Host "1: To Choose a Column" -ForegroundColor DarkBlue
+        Write-Host "2: To Choose a Row" -ForegroundColor DarkBlue
+        Write-Host "3: To Choose a specific Cell" -ForegroundColor DarkBlue
+    
+        $Choice = Read-Host "Enter the number of your choice"
+        if ([string]::IsNullOrWhiteSpace($Choice)) {
+            Write-Host "No choice made. Exiting ..." -ForegroundColor Yellow
+            return
+        }
+    
+        Switch ($Choice) {
+            1 { Column }  # Call Column function
+            2 { Row }     # Call Row function
+            3 { Cell }    # Call Cell function
+            Default { Write-Host "Invalid choice. Please try again." -ForegroundColor Yellow }
+        }
+    
+        # Save the extracted data to a new file
+        if ($Global:ExtractedData) {
+            $SaveChoice = Read-Host "Would you like to save this data to a new file? (y/n)"
+            if ([string]::IsNullOrWhiteSpace($SaveChoice)) {
+                Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                return
+            }
+            elseif ($SaveChoice.ToLower() -eq "y") {
+                $SavePath = Read-Host "Enter the directory to save the new file"
+                if ([string]::IsNullOrWhiteSpace($SavePath)) {
+                    Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                    return
+                }
+                elseif (-Not (Test-Path -Path $SavePath)) {
+                    Write-Host "Invalid directory path. Exiting ..." -ForegroundColor Red
+                    return
+                }
+                $FileName = Read-Host "Enter the name of the new file (without extension)"
+                if ([string]::IsNullOrWhiteSpace($FileName)) {
+                    Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                    return
+                }
+                $FileNameWithExtension = "$FileName.csv"
+                $FullSavePath = Join-Path -Path $SavePath -ChildPath $FileNameWithExtension
+    
+                # Handle existing files and archive
+                if (Test-Path -Path $FullSavePath) {
+                    $ArchivePath = Join-Path -Path $SavePath -ChildPath "Archive"
+    
+                    # Create Archive folder if not exists
+                    if (-Not (Test-Path -Path $ArchivePath)) {
+                        New-Item -Path $ArchivePath -ItemType Directory
+                    }
+    
+                    # Move the existing file to Archive
+                    $TimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
+                    $ArchivedFileName = "$FileName`_$TimeStamp.csv"
+                    $ArchivedFilePath = Join-Path -Path $ArchivePath -ChildPath $ArchivedFileName
+    
+                    Move-Item -Path $FullSavePath -Destination $ArchivedFilePath
+                    Write-Host "Existing file moved to archive: $ArchivedFilePath" -ForegroundColor Green
+                }
+    
+                # Handle different data structures
+                if ($Global:ExtractedData -is [array]) {
+                    $Global:ExtractedData | Out-File -FilePath $FullSavePath -Encoding utf8
+                } elseif ($Global:ExtractedData -is [hashtable] -or $Global:ExtractedData -is [pscustomobject]) {
+                    $Global:ExtractedData | ConvertTo-Csv -NoTypeInformation | Out-File -FilePath $FullSavePath -Encoding utf8
+                } else {
+                    Out-File -FilePath $FullSavePath -InputObject $Global:ExtractedData -Encoding utf8
+                }
+    
+                Write-Host "Data saved to $FullSavePath" -ForegroundColor Green
+            }
+        } else {
+            Write-Host "No data was extracted to save." -ForegroundColor Yellow
+        }
+    }
+
+    function RemoveCSV {
+        Write-Host "The last created CSV is : $FullPath"
+        $PreviousChoice = (Read-Host -Prompt "Do you want to remove the previously created CSV? (y/n)")
+        $UserChoice = $PreviousChoice.ToLower()
+        if ([string]::IsNullOrWhiteSpace($UserChoice)) {
+            Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+            return
+        } 
+        elseif ($UserChoice -ne "n" -and $UserChoice -ne "y") {
+            Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
+            return
+        }
+        elseif ($UserChoice -eq "y") {
+            Remove-Item -Path $FullPath
+        }
+        else {
+            $RemoveChoice = (Read-Host -Prompt "Do you want to remove another file? (y/n)")
+            if ([string]::IsNullOrWhiteSpace($RemoveChoice)) {
+                Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                return
+            } 
+            elseif ($RemoveChoice -ne "n" -and $RemoveChoice -ne "y") {
+                Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
+                return
+            }
+            elseif ($RemoveChoice -eq "y") {
+                $RemovePath = (Read-Host -Prompt "Input the path where the file you want to remove is located")
+                if ([string]::IsNullOrWhiteSpace($RemovePath)) {
+                    Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                    return
+                } 
+                elseif (-Not (Test-Path -Path $RemovePath)) {
+                    Write-Host "Invalid directory path. Exiting ..." -ForegroundColor Red
+                    return
+                }
+                else {
+                    ls $RemovePath
+                }
+                
+            }
+            else {
+                return
+            }
+        }
+
     }
     
-
-      # $csvFileToReadPath = $FullPath
+    
+        # This is the logic we talked in class, Im saving in it as reference
+        # $csvFileToReadPath = $FullPath
         # $csvData = Import-csv -path $csvFileToReadPath
         # $names = $csvData | ForEach-Object{$_.name}
         # Write-Host $names
@@ -319,8 +451,9 @@ Do {
     Write-Host "1 to Create a new CSV"
     Write-Host "2 to Read a CSV file"
     Write-Host "3 to Add content to a CSV file"
-    Write-Host "4 for To retrieve information from a CSV file"
-    Write-Host "5 for Exit"
+    Write-Host "4 to retrieve information from a CSV file and added it to a new file"
+    Write-Host "5 to remove a file"
+    Write-Host "6 for Exit"
     $Choice = (Read-Host -Prompt "Enter the number of your choice")
         if ([string]::IsNullOrWhiteSpace($Choice)) {
             Write-Host "A function has not been selected" -ForegroundColor Yellow
@@ -330,7 +463,8 @@ Do {
             2 { ReadCSV }
             3 { AddContentCSV }
             4 { DataCSV }
-            5 { ForExit }
+            5 { RemoveCSV }
+            6 { ForExit }
             Default { Write-Host "Invalid choice. Please try again." -ForegroundColor Yellow }
         }  
 
