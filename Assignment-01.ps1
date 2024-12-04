@@ -12,6 +12,7 @@ function ForExit {
 
 Do {
     
+    # Creates a new CSV file, in the path choosen, we can add content and read it.
     function CreateCSV {
         Write-Host "You have choosen to Create an CSV" -ForegroundColor Cyan
 
@@ -44,7 +45,7 @@ Do {
         
         # To choose the files new name 
         $NewPath = "$Path\$FolderName"
-        $FileName = (Read-Host -Prompt "How are you going to name your new file?")
+        $FileName = (Read-Host -Prompt "How are you going to name your new file (Do not add .csv extension)?")
         if ([string]::IsNullOrWhiteSpace($FileName)) {
             Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
             return
@@ -63,7 +64,7 @@ Do {
         $Global:FullPath = $FullPath
         Add-Content -Path $FullPath
         
-        # To add More content
+        # To read the content and to add more content
         do {
             $Read = (Read-Host -Prompt "Would you like to read what you just wrote? (y/n)")
                 if ([string]::IsNullOrWhiteSpace($Read)) {
@@ -101,6 +102,54 @@ Do {
         return $FullPath
     } 
 
+    # To read the last created CSV or another CSV File
+    function ReadCSV {
+        Write-Host "You have choosen to read a CSV file" -ForegroundColor Cyan
+        write-host "The Last CSV was previously created at :$FullPath" -ForegroundColor Yellow
+        
+        $PreviousChoice = (Read-Host -Prompt "Do you want to read the CSV previously created? (y/n)" )
+        $UserChoice = $PreviousChoice.ToLower()
+            if ([string]::IsNullOrWhiteSpace($UserChoice)) {
+                Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                return
+            }
+            elseif($UserChoice -ne "n" -and $UserChoice -ne "y") {
+                Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
+                return
+            }
+            elseif ($UserChoice -eq "y") {
+                Import-CSV -Path $FullPath
+            } 
+            else {
+                $NewFilePath = (Read-Host "Choose a different directory: (Input the new path)")
+                    if([string]::IsNullOrWhiteSpace($NewFilePath)) {
+                        Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                        return
+                    }
+                    elseif (-Not (Test-Path -Path $NewFilePath)) {
+                        Write-Host "The path '$NewFilePath' does not exist. Please enter a valid directory." -ForegroundColor Red
+                        return
+                    }
+                    else{
+                        ls $NewFilePath
+                    }
+                $ChooseFile = (Read-Host -Prompt "Choose your file")
+                $NewFullPath = Join-Path -Path $NewFilePath -ChildPath $ChooseFile
+                    if([string]::IsNullOrWhiteSpace($ChooseFile)) {
+                        Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                        return
+                    }
+                    elseif (-Not (Test-Path -Path $NewFullPath)) {
+                        Write-Host "The file '$ChooseFile' does not exist. Please enter a valid directory." -ForegroundColor Yellow
+                        return
+                    }
+                    else{
+                        Import-CSV -Path $NewFullPath
+                    }
+                
+            }   
+    }
+    # Add content to the last created CSV or another CSV file   
     function AddContentCSV {
         Write-Host "You have choosen to modify a CSV" -ForegroundColor Cyan
         write-host "The Last CSV was previously created at :$FullPath" -ForegroundColor Yellow
@@ -194,19 +243,21 @@ Do {
 
 
     Write-Host "Select a function to execute:"
-    Write-Host "1 for CreateCSV"
-    Write-Host "2 for ModifyCSV"
-    Write-Host "3 for DataCSV"
-    Write-Host "4 for Exit"
+    Write-Host "1 to Create a new CSV"
+    Write-Host "2 to Read a CSV file"
+    Write-Host "3 to Add content to a CSV file"
+    Write-Host "4 for To retrieve information from a CSV file"
+    Write-Host "5 for Exit"
     $Choice = (Read-Host -Prompt "Enter the number of your choice")
         if ([string]::IsNullOrWhiteSpace($Choice)) {
             Write-Host "A function has not been selected" -ForegroundColor Yellow
         }
         Switch ($Choice) {
             1 { CreateCSV }
-            2 { AddContentCSV }
-            3 { DataCSV }
-            4 { ForExit }
+            2 { ReadCSV }
+            3 { AddContentCSV }
+            4 { DataCSV }
+            5 { ForExit }
             Default { Write-Host "Invalid choice. Please try again." -ForegroundColor Yellow }
         }  
 
