@@ -233,7 +233,8 @@ Do {
             return
         } elseif ($UserChoice -eq "y") {
             $CsvData = Import-Csv -Path $FullPath
-    
+            $Global:ExtractedData = $null 
+
             # Define the functions before the Switch block
             function Column {
                 $ColumnName = Read-Host "Input the name of the column"
@@ -241,9 +242,10 @@ Do {
                         Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
                         return
                     }
-                $ChosenColumn = $CsvData | ForEach-Object { $_.$ColumnName }
-                Write-Host "Selected Column Data:" -ForegroundColor Cyan
-                $ChosenColumn | ForEach-Object { Write-Host $_ } 
+                $ColumnName = Read-Host "Input the name of the column"
+                $Global:ExtractedData = $CsvData | ForEach-Object { $_.$ColumnName }
+                Write-Host "Selected Column Data:"
+                $Global:ExtractedData | ForEach-Object { Write-Host $_ }
             }
     
             function Row {
@@ -252,9 +254,9 @@ Do {
                         Write-Host "Invalid row number. Please enter a valid number." -ForegroundColor Yellow
                         return
                     }
-                $ChosenRow = $CsvData[$RowIndex]
-                Write-Host "Selected Row Data:" 
-                $ChosenRow
+                $Global:ExtractedData = $CsvData[$RowIndex]
+                Write-Host "Selected Row Data:"
+                $Global:ExtractedData
             }
     
             function Cell {
@@ -268,9 +270,9 @@ Do {
                         Write-Host "Invalid row number. Please enter a valid number." -ForegroundColor Yellow
                         return
                     }
-                $CellValue = $CsvData[$RowIndex].$ColumnName
-                Write-Host "Selected Cell Value:" -ForegroundColor Cyan
-                $CellValue 
+                $Global:ExtractedData = $CsvData[$RowIndex].$ColumnName
+                Write-Host "Selected Cell Value:"
+                Write-Host $Global:ExtractedData 
             }
     
             # Display options and invoke functions based on user choice
