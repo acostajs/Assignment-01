@@ -221,23 +221,94 @@ Do {
     } 
 
     function DataCSV {
-        $csvFileToReadPath = $FullPath
-        $csvData = Import-csv -path $csvFileToReadPath
-        $names = $csvData | ForEach-Object{$_.name}
-        Write-Host $names
-
-        $newpath = (read-host -Prompt "Input the new path")
-        mkdir $newpath
-        $newname = (read-host -Prompt "input the new name file")
-        $newnamecsv = "$newname.csv"
-        new-item -path $newpath -name $newnamecsv -itemtype "file"
-        $newnewfullpath = join-path -Path $newpath -childpath $newnamecsv
-
-        add-content -path $newnewfullpath -value $names
-        Import-csv $newnewfullpath
-
-        
+        Write-Host "The last created CSV is : $FullPath"
+        $PreviousChoice = (Read-Host -Prompt "Do you want to import data from the previously created CSV? (y/n)")
+        $UserChoice = $PreviousChoice.ToLower()
+    
+        if ([string]::IsNullOrWhiteSpace($UserChoice)) {
+            Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+            return
+        } elseif ($UserChoice -ne "n" -and $UserChoice -ne "y") {
+            Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
+            return
+        } elseif ($UserChoice -eq "y") {
+            $CsvData = Import-Csv -Path $FullPath
+    
+            # Define the functions before the Switch block
+            function Column {
+                $ColumnName = Read-Host "Input the name of the column"
+                    if ([string]::IsNullOrWhiteSpace($UserChoice)) {
+                        Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                        return
+                    }
+                $ChosenColumn = $CsvData | ForEach-Object { $_.$ColumnName }
+                Write-Host "Selected Column Data:" -ForegroundColor Cyan
+                $ChosenColumn | ForEach-Object { Write-Host $_ } 
+            }
+    
+            function Row {
+                $RowIndex = Read-Host "Input the row number (zero-based index)"
+                    if (-not [int]::TryParse($RowIndex, [ref]$null)) {
+                        Write-Host "Invalid row number. Please enter a valid number." -ForegroundColor Yellow
+                        return
+                    }
+                $ChosenRow = $CsvData[$RowIndex]
+                Write-Host "Selected Row Data:" 
+                $ChosenRow
+            }
+    
+            function Cell {
+                $ColumnName = Read-Host "Input the name of the column"
+                    if ([string]::IsNullOrWhiteSpace($UserChoice)) {
+                        Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                        return
+                    }
+                $RowIndex = Read-Host "Input the row number (zero-based index)"
+                    if (-not [int]::TryParse($RowIndex, [ref]$null)) {
+                        Write-Host "Invalid row number. Please enter a valid number." -ForegroundColor Yellow
+                        return
+                    }
+                $CellValue = $CsvData[$RowIndex].$ColumnName
+                Write-Host "Selected Cell Value:" -ForegroundColor Cyan
+                $CellValue 
+            }
+    
+            # Display options and invoke functions based on user choice
+            Write-Host "Choose the information you want to extract:" -ForegroundColor Cyan
+            Write-Host "1: To Choose a Column" -ForegroundColor DarkBlue
+            Write-Host "2: To Choose a Row" -ForegroundColor DarkBlue
+            Write-Host "3: To Choose a specific Cell" -ForegroundColor DarkBlue
+    
+            $Choice = Read-Host "Enter the number of your choice"
+            if ([string]::IsNullOrWhiteSpace($Choice)) {
+                Write-Host "No choice made. Exiting ..." -ForegroundColor Yellow
+                return
+            }
+    
+            Switch ($Choice) {
+                1 { Column }  
+                2 { Row }     
+                3 { Cell }    
+                Default { Write-Host "Invalid choice. Please try again." -ForegroundColor Yellow }
+            }
+        }
     }
+    
+
+      # $csvFileToReadPath = $FullPath
+        # $csvData = Import-csv -path $csvFileToReadPath
+        # $names = $csvData | ForEach-Object{$_.name}
+        # Write-Host $names
+
+        # $newpath = (read-host -Prompt "Input the new path")
+        # mkdir $newpath
+        # $newname = (read-host -Prompt "input the new name file")
+        # $newnamecsv = "$newname.csv"
+        # new-item -path $newpath -name $newnamecsv -itemtype "file"
+        # $newnewfullpath = join-path -Path $newpath -childpath $newnamecsv
+
+        # add-content -path $newnewfullpath -value $names
+        # Import-csv $newnewfullpath
 
 
 
