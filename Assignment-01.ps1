@@ -386,6 +386,8 @@ Do {
     }
 
     function RemoveCSV {
+        # Got to correct that once the file is deleted, you cannot run again the function
+        # Would be a good idea to run it in two different functions and choose with a switch
         if(Test-Path -Path $FullPath){
             Write-Host "The last created CSV is : $FullPath"
             $PreviousChoice = (Read-Host -Prompt "Do you want to remove the previously created CSV? (y/n)")
