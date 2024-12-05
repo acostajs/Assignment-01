@@ -304,7 +304,7 @@ Do {
         }
     
         # Display options and invoke functions based on user choice
-        Get-Content -Path $FullPath 
+        
         Write-Host "Choose the information you want to extract:" -ForegroundColor Cyan
         Write-Host "1: To Choose a Column" -ForegroundColor DarkBlue
         Write-Host "2: To Choose a Row" -ForegroundColor DarkBlue
