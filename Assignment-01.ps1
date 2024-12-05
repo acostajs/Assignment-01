@@ -386,39 +386,18 @@ Do {
     }
 
     function RemoveCSV {
-        # Got to correct that once the file is deleted, you cannot run again the function
-        # Would be a good idea to run it in two different functions and choose with a switch
-        if(Test-Path -Path $FullPath){
-            Write-Host "The last created CSV is : $FullPath"
-            $PreviousChoice = (Read-Host -Prompt "Do you want to remove the previously created CSV? (y/n)")
-            $UserChoice = $PreviousChoice.ToLower()
-            if ([string]::IsNullOrWhiteSpace($UserChoice)) {
-                Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+        function DeleteLatest {
+            if(-Not (Test-Path -Path $FullPath)) {
+                Write-Host "Directory no longer exist. Exiting ..." -ForegroundColor Red
                 return
-            } 
-            elseif ($UserChoice -ne "n" -and $UserChoice -ne "y") {
-                Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
-                return
-            }
-            elseif ($UserChoice -eq "y") {
-                Remove-Item -Path $FullPath
             }
             else {
-                $RemoveChoice = (Read-Host -Prompt "Do you want to remove a file? (y/n)")
-                $RemoveDecision = $RemoveChoice.ToLower()
-                if ([string]::IsNullOrWhiteSpace($RemoveDecision)) {
-                    Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
-                    return
-                } 
-                elseif ($RemoveDecision -ne "n" -and $RemoveDecision -ne "y") {
-                    Write-Host "Invalid input. Please input 'y' for yes or 'n' for no." -ForegroundColor Red
-                    return
-                }
-                elseif ($RemoveDecision -eq "n"){
-                    return
-                }
-                else {
-                    $RemovePath = (Read-Host -Prompt "Input the path where the file you want to remove is located")
+                Remove-Item -Path $FullPath
+            }
+     
+        }
+        function DeleteNew {
+            $RemovePath = (Read-Host -Prompt "Input the path where the file you want to remove is located")
                     if ([string]::IsNullOrWhiteSpace($RemovePath)) {
                         Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
                         return
@@ -430,14 +409,33 @@ Do {
                     else {
                         ls $RemovePath
                         $RemoveFile = (Read-Host -Prompt "Which file do you want to remove?")
+                        if ([string]::IsNullOrWhiteSpace($RemoveFile)) {
+                            Write-Host "Invalid Input: Exiting ..." -ForegroundColor Red
+                            return
+                        }  
                         $RemoveFullPath = Join-Path -Path $RemovePath -ChildPath $RemoveFile
+                        if (-Not (Test-Path -Path $RemoveFullPath)) {
+                            Write-Host "Invalid directory path. Exiting ..." -ForegroundColor Red
+                            return
+                        }
+                        else {
                         Remove-Item -Path $RemoveFullPath
+                        }
                     }
-
-            }
-        }       
-       
         }
+       
+        Write-Host "Select a function to execute"
+        Write-Host "1 To delete the last created CSV file"
+        Write-Host "2 to delete another CSV file of your choice"
+        $DeleteChoice = (Read-Host -Prompt "Enter the number of your choice")
+        if ([string]::IsNullOrWhiteSpace($DeleteChoice)) {
+            Write-Host "A function has not been selected" -ForegroundColor Yellow
+        }
+        Switch ($DeleteChoice) {
+            1 { DeleteLatest }
+            2 { DeleteNew }
+            Default { Write-Host "Invalid choice. Please try again." -ForegroundColor Yellow }
+        }  
     }
 
     Write-Host "Select a function to execute:"
